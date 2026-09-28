@@ -29,6 +29,8 @@ option(
   LIBCLC_USE_SPIRV_BACKEND "Build SPIR-V targets with the SPIR-V backend." OFF
 )
 
+option(LIBCLC_THIN_LTO "Build with -flto=thin instead of -flto" OFF)
+
 # List of all supported architectures.
 set( LIBCLC_ARCHS_NVPTX nvptx64 )
 set( LIBCLC_ARCHS_AMDGPU amdgpu amdgcn )
@@ -164,9 +166,15 @@ if(LIBCLC_TARGET_ARCH IN_LIST LIBCLC_ARCHS_AMDGPU OR LIBCLC_TARGET_ARCH IN_LIST 
   list(APPEND target_compile_flags "SHELL:-Xclang -fapply-global-visibility-to-externs")
 endif()
 
+if(LIBCLC_THIN_LTO)
+  set(lto_flag -flto=thin)
+else()
+  set(lto_flag -flto)
+endif()
+
 # Common compile options shared by CLC and OpenCL libraries.
 set(compile_flags
-  -flto
+  ${lto_flag}
   --target=${clang_triple}
   -nostdlib
   -nostdlibinc
